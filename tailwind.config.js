@@ -13,6 +13,7 @@ module.exports = {
       light: colors.slate[200],
       white: colors.slate[50],
       error: colors.red[700],
+      selectedBase: colors.cyan[500],
     },
     extend: {
       fontSize: {
@@ -22,7 +23,6 @@ module.exports = {
         sans: ['var(--font-catamaran)', ...fontFamily.sans],
       },
     },
-
   },
   plugins: [],
 }

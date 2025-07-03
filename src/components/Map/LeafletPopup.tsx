@@ -25,7 +25,7 @@ const LeafletPopup = ({
   item,
   ...props
 }: LeafletPopupProps) => {
-  const { title, address } = item
+  const { title, address, plastik, organik, anorganik } = item
 
   return (
     <Popup {...props}>
@@ -55,8 +55,11 @@ const LeafletPopup = ({
             style={{ marginTop: AppConfig.ui.markerIconSize * 2 + 8 }}
           >
             <h3 className="m-0 text-lg font-bold leading-none">{title}</h3>
-            <p className="m-0 text-secondary">{address}</p>
-            {/* todo: new component for button group */}
+            <p className="m-0 text-secondary">Jumlah sampah setiap kategori</p>
+            <p className="m-0 text-secondary">♻️ Plastik: {plastik} kg</p>
+            <p className="m-0 text-secondary">🌿 Organik: {organik} kg</p>
+            <p className="m-0 text-secondary">🧱 Anorganik: {anorganik} kg</p>
+
             <div className="mt-6 flex flex-row justify-between gap-2 p-2">
               <Button className="gap-2 bg-secondary text-white" onClick={() => handlePopupClose()} small>
                 <ChevronLeft size={AppConfig.ui.menuIconSize} />

@@ -11,7 +11,7 @@ const catamaran = Catamaran({
   subsets: ['latin'],
   variable: '--font-catamaran',
 })
-
+// data bisa dikelompokkan dari "Sampah Plastik (kg)": 25, "Sampah Organik (kg)": 5, "sampah Anorganik (kg)": 3
 const App = ({ Component, pageProps }: AppProps) => (
   <>
     <Head>

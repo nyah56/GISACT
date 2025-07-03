@@ -1,15 +1,18 @@
+// LeafletMapContainer.tsx
 import { LatLngExpression, MapOptions } from 'leaflet'
 import { MapContainer, TileLayer } from 'react-leaflet'
 
+import { baseMaps } from '../Map/index'
 import useMapContext from './useMapContext'
 
 export const LeafletMapContainer: React.FC<
   {
     center: LatLngExpression
-    children: JSX.Element | JSX.Element[]
     zoom: number
+    selectedBase: 'carto' | 'esri' | 'osm'
+    children: JSX.Element | JSX.Element[]
   } & MapOptions
-> = ({ ...options }) => {
+> = ({ selectedBase, ...options }) => {
   const { setMap } = useMapContext()
 
   return (
@@ -18,10 +21,7 @@ export const LeafletMapContainer: React.FC<
       className="absolute h-full w-full text-white outline-0"
       {...options}
     >
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-        url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-      />
+      <TileLayer attribution="&copy; OpenStreetMap, Esri, Carto" url={baseMaps[selectedBase].url} />
       {options.children}
     </MapContainer>
   )
