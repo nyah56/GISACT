@@ -9,26 +9,33 @@ import { loadPlaces } from '#lib/loadPlaces'
 import MarkerCategories, { Category } from '#lib/MarkerCategories'
 import { Places, PlacesType, type PlaceValues } from '#lib/Places'
 
+// import { SearchBox } from '../common/SearchBox'
 import LeafleftMapContextProvider from './LeafletMapContextProvider'
 import useMapContext from './useMapContext'
 import useMarkerData from './useMarkerData'
 
-const LeafletCluster = dynamic(async () => (await import('./LeafletCluster')).LeafletCluster(), {
-  ssr: false,
-})
+// const LeafletCluster = dynamic(async () => (await import('./LeafletCluster')).LeafletCluster(), {
+//   ssr: false,
+// })
 const CenterToMarkerButton = dynamic(async () => (await import('./ui/CenterButton')).CenterButton, {
   ssr: false,
 })
 const CustomPolygon = dynamic(async () => (await import('./LeafletPolygon')).CustomPolygon)
-const CustomMarker = dynamic(async () => (await import('./LeafletMarker')).CustomMarker, {
-  ssr: false,
-})
+
 const LocateButton = dynamic(async () => (await import('./ui/LocateButton')).LocateButton, {
   ssr: false,
 })
 const LeafletMapContainer = dynamic(async () => (await import('./LeafletMapContainer')).LeafletMapContainer, {
   ssr: false,
 })
+const LegendPanel = dynamic(async () => (await import('./ui/Legend')).LegendPanel, {
+  ssr: false,
+})
+const Basemap = dynamic(async () => (await import('./ui/Basemap')).BaseMapSelector, {
+  ssr: false,
+})
+
+const SearchBox = dynamic(async () => (await import('../common/SearchBox')).SearchBox, { ssr: false })
 export const baseMaps = {
   carto: {
     name: 'CARTO Voyager',
@@ -40,10 +47,10 @@ export const baseMaps = {
     url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
     preview: '/tiles/esri.png', // thumbnail image preview
   },
-  osm: {
-    name: 'OpenStreetMap',
-    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-    preview: '/tiles/osm.png',
+  stadia: {
+    name: 'Stadia Alidade Light',
+    url: 'https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png',
+    preview: '/tiles/stadia.png',
   },
 }
 export interface ViewState {
@@ -138,17 +145,7 @@ const LeafletMapInner = () => {
       prev.includes(category) ? prev.filter(c => c !== category) : [...prev, category],
     )
   }
-  /** watch position & zoom of all markers */
-  // useEffect(() => {
-  //   if (!allMarkersBoundCenter || !map) return
 
-  //   const moveEnd = () => {
-  //     map.off('moveend', moveEnd)
-  //   }
-
-  //   map.flyTo(allMarkersBoundCenter.centerPos, allMarkersBoundCenter.minZoom, { animate: false })
-  //   map.once('moveend', moveEnd)
-  // }, [allMarkersBoundCenter, map])
   useEffect(() => {
     if (!map || !places.length || !allMarkersBoundCenter) return
 
@@ -201,11 +198,24 @@ const LeafletMapInner = () => {
           >
             {!isLoading ? (
               <>
-                <CenterToMarkerButton
-                  center={allMarkersBoundCenter.centerPos}
-                  zoom={allMarkersBoundCenter.minZoom}
-                />
-                <LocateButton />
+                <div className="absolute right-2 top-2 z-[9999] flex flex-col items-end gap-2 sm:flex-row sm:items-center">
+                  <div className="w-[90vw] max-w-xs sm:w-auto">
+                    <SearchBox
+                      onResult={(lat: number, lon: number) => {
+                        if (map) {
+                          map.flyTo([lat, lon], 18) // zoom into the result
+                        }
+                      }}
+                    />
+                  </div>
+
+                  <CenterToMarkerButton
+                    center={allMarkersBoundCenter.centerPos}
+                    zoom={allMarkersBoundCenter.minZoom}
+                  />
+                  <LocateButton />
+                </div>
+
                 {/* {places.map(place =>
                   place.polygon ? <CustomPolygon key={`poly-${place.id}`} place={place} /> : null,
                 )} */}
@@ -227,48 +237,10 @@ const LeafletMapInner = () => {
             )}
           </LeafletMapContainer>
         )}
-        <div className="absolute bottom-2 left-2 z-[9999] flex gap-2 rounded bg-white/80 p-2 shadow">
-          {Object.entries(baseMaps).map(([key, map]) => (
-            <button
-              key={key}
-              onClick={() => setSelectedBase(key as 'carto' | 'esri' | 'osm')}
-              className={`h-16 w-16 overflow-hidden rounded border-4 ${
-                selectedBase === key ? 'border-selectedBase' : 'border-transparent'
-              }`}
-              title={map.name}
-            >
-              <img src={map.preview} alt={map.name} className="h-full w-full object-cover" />
-            </button>
-          ))}
-        </div>
-        <div className="absolute bottom-24 right-2 z-[9999] w-48 rounded-xl bg-white/90 p-4 shadow-xl backdrop-blur-md">
-          <h4 className="text-gray-700 mb-3 border-b pb-1 text-base font-semibold">Legend</h4>
-          <div className="flex flex-col gap-2">
-            {Object.entries(MarkerCategories).map(([key, val]) => {
-              if (val.hideInMenu) return null
-              const isSelected = selectedCategories.includes(key as Category)
-              return (
-                <button
-                  key={key}
-                  onClick={() => toggleCategory(key as Category)}
-                  className={`flex items-center justify-start gap-2 rounded-lg px-2 py-1 text-sm transition-all ${
-                    isSelected
-                      ? 'text-gray-900 bg-selectedBase/20 font-medium'
-                      : 'text-gray-600 opacity-60 hover:opacity-90'
-                  } hover:bg-selectedBase/30`}
-                  title={val.name}
-                >
-                  <val.icon size={18} className="text-gray-600" />
-                  <div
-                    className="h-3 w-3 rounded-full border border-white shadow"
-                    style={{ backgroundColor: val.color }}
-                  />
-                  <span className="truncate">{val.name}</span>
-                </button>
-              )
-            })}
-          </div>
-        </div>
+        {/* basemap */}
+        <Basemap baseMaps={baseMaps} selectedBase={selectedBase} setSelectedBase={setSelectedBase} />
+        {/* legend */}
+        <LegendPanel selectedCategories={selectedCategories} toggleCategory={toggleCategory} />
       </div>
     </div>
   )

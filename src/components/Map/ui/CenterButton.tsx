@@ -44,9 +44,7 @@ export const CenterButton = ({ center, zoom }: CenterButtonProps) => {
     <button
       type="button"
       style={{ zIndex: 400 }}
-      className={`button absolute top-2 right-3 rounded bg-white p-2 shadow-md ${
-        isTouched ? 'text-dark' : 'text-light'
-      } `}
+      className={`button rounded bg-white p-2 shadow-md ${isTouched ? 'text-dark' : 'text-light'}`}
       onClick={() => handleClick()}
     >
       <Shrink size={AppConfig.ui.mapIconSize} />
